@@ -1,9 +1,19 @@
+import os
 from typing import Union
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
+from openai import OpenAI
 from pydantic import BaseModel
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+client = OpenAI(api_key=OPENAI_API_KEY)
+
 app = FastAPI()
+
+
+class Order(BaseModel):
+    product: str
+    units: int
 
 
 class Item(BaseModel):
@@ -12,9 +22,34 @@ class Item(BaseModel):
     is_offer: Union[bool, None] = None
 
 
+def generate_news():
+    try:
+        completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": "What are some of the key events that happened in March 2021?",
+                }
+            ],
+            model="gpt-4-1106-preview",
+        )
+    except Exception as e:
+        print("Error while generating description:", str(e))
+        return None
+    return (
+        completion.choices[0].message.content if completion else "No response generated"
+    )
+
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+
+
+@app.get("/news")
+def generate_news():
+    news = generate_news()
+    return {"news": news}
 
 
 @app.get("/items/{item_id}")
