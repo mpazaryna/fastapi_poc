@@ -2,6 +2,8 @@
 
 ## Conda
 
+I'm having problems running this app using a conda environment.  For now, use venv instead.
+
 ```sh
 # create and activate a new enviroment
 conda create --name fastapi_poc python=3.12 
@@ -25,10 +27,3 @@ python3 -m uvicorn main:app --reload
 
 [Swagger UI](http://127.0.0.1:8000/docs)
 [Redoc](http://127.0.0.1:8000/redoc)
-
-## Port gets held even after proper shutdown
-
-```sh
-sudo lsof -i :8000
-kill -9 <PID>
-```
