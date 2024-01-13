@@ -1,10 +1,15 @@
 import os
 from typing import Union
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Query
 from openai import OpenAI
 from pydantic import BaseModel
 
+# Load environment variables from .env file
+load_dotenv()
+
+# Now, you can safely load the OPENAI_API_KEY
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -22,7 +27,7 @@ class Item(BaseModel):
     is_offer: Union[bool, None] = None
 
 
-def generate_news():
+def fetch_news():
     try:
         completion = client.chat.completions.create(
             messages=[
@@ -48,7 +53,7 @@ def read_root():
 
 @app.get("/news")
 def generate_news():
-    news = generate_news()
+    news = fetch_news()
     return {"news": news}
 
 
