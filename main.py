@@ -2,66 +2,49 @@ import os
 from typing import Union
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Query
-from openai import OpenAI
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+
+from agents.add.adder import add_two_numbers
+
+
+class AddNumbers(BaseModel):
+    number1: float
+    number2: float
+
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Now, you can safely load the OPENAI_API_KEY
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-client = OpenAI(api_key=OPENAI_API_KEY)
+CUSTOM_API_KEY = os.getenv("CUSTOM_API_KEY", "")
 
 app = FastAPI()
 
 
-class Order(BaseModel):
-    product: str
-    units: int
+def check_custom_api_key(request: Request):
+    api_key = request.headers.get("X-Custom-API-Key")
+    if api_key is None:
+        raise HTTPException(status_code=401, detail="Missing API key")
+    if api_key != CUSTOM_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Union[bool, None] = None
-
-
-def fetch_news():
-    try:
-        completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": "What are some of the key events that happened in March 2021?",
-                }
-            ],
-            model="gpt-4-1106-preview",
-        )
-    except Exception as e:
-        print("Error while generating description:", str(e))
-        return None
-    return (
-        completion.choices[0].message.content if completion else "No response generated"
-    )
-
-
-@app.get("/")
+@app.get("/", dependencies=[Depends(check_custom_api_key)])
 def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/news")
-def generate_news():
-    news = fetch_news()
-    return {"news": news}
+@app.post("/add")
+async def add(number1: float, number2: float):
+    return {"result": add_two_numbers(number1, number2)}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.post("/v1/add", dependencies=[Depends(check_custom_api_key)])
+async def add(number1: float, number2: float):
+    return {"result": add_two_numbers(number1, number2)}
 
 
-@app.put("/items/{item_id}")
-def update_item(item_id: int, item: Item):
-    return {"item_name": item.name, "item_id": item_id}
+@app.post("/json/add")
+async def add(add_numbers: AddNumbers):
+    return {"result": add_two_numbers(add_numbers.number1, add_numbers.number2)}
