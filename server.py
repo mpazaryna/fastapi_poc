@@ -1,4 +1,4 @@
-# main.py
+# server.py
 
 from fastapi import FastAPI
 
