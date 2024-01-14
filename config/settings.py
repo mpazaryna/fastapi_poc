@@ -6,4 +6,4 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-CUSTOM_API_KEY = os.getenv("CUSTOM_API_KEY", "")
+CUSTOM_API_KEY = os.environ.get("CUSTOM_API_KEY", "")
