@@ -18,7 +18,7 @@ deactivate
 
 ```sh
 # when running locally, otherwise I get a error
-python3 -m uvicorn main:app --reload
+python3 -m uvicorn server:app --reload
 ```
 
 ## API Docs
