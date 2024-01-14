@@ -18,8 +18,3 @@ async def add(number1: float, number2: float):
 @router.post("/v1/add", dependencies=[Depends(check_custom_api_key)])
 async def add_v1(add_numbers: AddNumbers):
     return {"result": add_two_numbers(add_numbers.number1, add_numbers.number2)}
-
-
-@router.post("/json/add")
-async def add_json(add_numbers: AddNumbers):
-    return {"result": add_two_numbers(add_numbers.number1, add_numbers.number2)}
