@@ -7,6 +7,6 @@ from dependencies.api_key_dependency import check_custom_api_key
 router = APIRouter()
 
 
-@router.get("/", dependencies=[Depends(check_custom_api_key)])
+@router.get("/")
 def read_root():
     return {"Hello": "World"}
